@@ -1,13 +1,14 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Story, StoryInputs, LoadingState } from './types';
-import { GHOST_TYPES, MOODS, PLACES, COLORS } from './constants';
-import { generateStory, generateIllustration, generateNarration } from './services/geminiService';
+import { GHOST_TYPES, MOODS, PLACES, COLORS, PET_TYPES } from './constants';
+import { generateStory, generateNarration } from './services/geminiService';
 import Header from './components/Header';
 import StoryForm from './components/StoryForm';
 import StoryDisplay from './components/StoryDisplay';
 import StoryLibrary from './components/StoryLibrary';
-import ApiKeyModal from './components/ApiKeyModal';
-import { setApiKey } from './services/apiKeyService';
+// Fix: Per Gemini API guidelines, the API key should not be managed in the UI.
+// import ApiKeyModal from './components/ApiKeyModal';
+// import { setApiKey } from './services/apiKeyService';
 
 // Audio decoding utilities
 const decode = (base64: string) => {
@@ -38,8 +39,9 @@ const decodeAudioData = async (
 export default function App() {
   const [inputs, setInputs] = useState<StoryInputs>({
     petName: '',
+    petType: PET_TYPES[0],
     favoritePlace: '',
-    favoriteColor: '',
+    favoriteColor: COLORS[0],
     ghostType: GHOST_TYPES[0],
     mood: MOODS[0],
   });
@@ -47,13 +49,13 @@ export default function App() {
   const [storyLibrary, setStoryLibrary] = useState<Story[]>([]);
   const [loading, setLoading] = useState<LoadingState>({
     story: false,
-    image: false,
     audio: false,
     isGenerating: false,
   });
   const [error, setError] = useState<string | null>(null);
   const [showLibrary, setShowLibrary] = useState(false);
-  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  // Fix: Per Gemini API guidelines, the API key should not be managed in the UI.
+  // const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
@@ -78,10 +80,15 @@ export default function App() {
     const { name, value } = e.target;
     setInputs(prev => ({ ...prev, [name]: value }));
   }, []);
+  
+  const handleSelectChange = useCallback((name: string, value: string) => {
+    setInputs(prev => ({ ...prev, [name]: value }));
+  }, []);
 
   const handleSurpriseMe = useCallback(() => {
     setInputs({
       petName: '',
+      petType: PET_TYPES[Math.floor(Math.random() * PET_TYPES.length)],
       favoritePlace: PLACES[Math.floor(Math.random() * PLACES.length)],
       favoriteColor: COLORS[Math.floor(Math.random() * COLORS.length)],
       ghostType: GHOST_TYPES[Math.floor(Math.random() * GHOST_TYPES.length)],
@@ -96,34 +103,28 @@ export default function App() {
     }
     setError(null);
     setCurrentStory(null);
-    setLoading({ story: true, image: true, audio: false, isGenerating: true });
+    setLoading({ story: true, audio: false, isGenerating: true });
     
     try {
-      const storyTextPromise = generateStory(inputs);
-      const illustrationUrlPromise = generateIllustration(inputs);
-      
-      const storyText = await storyTextPromise;
+      const storyText = await generateStory(inputs);
       setLoading(prev => ({ ...prev, story: false }));
-      
-      const imageUrl = await illustrationUrlPromise;
-      setLoading(prev => ({ ...prev, image: false }));
       
       const newStory: Story = {
         id: new Date().toISOString(),
         inputs,
         text: storyText,
-        imageUrl,
       };
       setCurrentStory(newStory);
     } catch (err: any) {
+      // Fix: Per Gemini API guidelines, the API key should not be managed in the UI.
+      // The modal for entering an API key has been removed.
       if (err.message === 'API_KEY_NOT_SET') {
-          setError("Please set your Gemini API key to continue.");
-          setShowApiKeyModal(true);
+          setError("This application has not been configured with a Gemini API key. Please check the setup.");
       } else {
         setError(err.message || 'An unknown error occurred.');
       }
     } finally {
-      setLoading(prev => ({...prev, isGenerating: false, story: false, image: false}));
+      setLoading({story: false, audio: false, isGenerating: false});
     }
   };
   
@@ -157,9 +158,10 @@ export default function App() {
       };
 
     } catch (err: any) {
+      // Fix: Per Gemini API guidelines, the API key should not be managed in the UI.
+      // The modal for entering an API key has been removed.
       if (err.message === 'API_KEY_NOT_SET') {
-          setError("Please set your Gemini API key to continue.");
-          setShowApiKeyModal(true);
+          setError("This application has not been configured with a Gemini API key. Please check the setup.");
       } else {
         setError(err.message);
       }
@@ -188,20 +190,22 @@ export default function App() {
     localStorage.setItem('petGhostStoryLibrary', JSON.stringify(updatedLibrary));
   };
 
-  const handleSaveApiKey = (key: string) => {
-    setApiKey(key);
-    setShowApiKeyModal(false);
-    setError(null);
-  };
+  // Fix: Per Gemini API guidelines, the API key should not be managed in the UI.
+  // const handleSaveApiKey = (key: string) => {
+  //   setApiKey(key);
+  //   setShowApiKeyModal(false);
+  //   setError(null);
+  // };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#1a1a2e] to-[#16213e] text-white font-sans p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-[#FFFDF9] text-gray-800 font-sans p-4 sm:p-6 lg:p-8">
       <div className="container mx-auto max-w-7xl">
         <Header onLibraryClick={() => setShowLibrary(true)} libraryCount={storyLibrary.length} />
         <main className="mt-8 grid grid-cols-1 lg:grid-cols-2 lg:gap-12">
           <StoryForm 
             inputs={inputs} 
-            onInputChange={handleInputChange} 
+            onInputChange={handleInputChange}
+            onSelectChange={handleSelectChange}
             onSubmit={handleSubmit} 
             onSurpriseMe={handleSurpriseMe} 
             isLoading={loading.isGenerating} 
@@ -225,7 +229,8 @@ export default function App() {
           onDeleteStory={deleteStoryFromLibrary}
         />
       )}
-      {showApiKeyModal && <ApiKeyModal onSave={handleSaveApiKey} />}
+      {/* Fix: Per Gemini API guidelines, the API key should not be managed in the UI. */}
+      {/* {showApiKeyModal && <ApiKeyModal onSave={handleSaveApiKey} onClose={() => setShowApiKeyModal(false)} />} */}
     </div>
   );
 }

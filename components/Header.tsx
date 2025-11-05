@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface HeaderProps {
@@ -14,21 +13,22 @@ const LibraryIcon = () => (
 
 const Header: React.FC<HeaderProps> = ({ onLibraryClick, libraryCount }) => {
   return (
-    <header className="flex justify-between items-center pb-4 border-b border-blue-900/50">
-      <div className="text-center">
-        <h1 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-yellow-300">
+    <header className="flex justify-between items-center pb-4 border-b border-gray-200">
+      <div className="text-left">
+        <h1 className="text-3xl sm:text-4xl font-bold text-[#0F35A6]">
           Pet Ghost Stories
         </h1>
-        <p className="text-sm text-blue-300 mt-1">Magical Bedtime Adventures for Your Best Friend</p>
+        <p className="text-sm text-gray-500 mt-1">Magical Bedtime Adventures for Your Best Friend</p>
       </div>
       <button 
         onClick={onLibraryClick}
-        className="relative flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg shadow-lg transition-transform transform hover:scale-105"
+        className="relative flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 border border-gray-300 text-[#0F35A6] rounded-lg shadow-sm transition-all transform hover:scale-105"
+        aria-label={`View my stories. You have ${libraryCount} saved.`}
       >
         <LibraryIcon />
         <span className="hidden sm:inline">My Stories</span>
         {libraryCount > 0 && (
-          <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+          <span className="absolute -top-2 -right-2 bg-[#BF0436] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
             {libraryCount}
           </span>
         )}

@@ -1,6 +1,7 @@
 
 export interface StoryInputs {
   petName: string;
+  petType: string;
   favoritePlace: string;
   favoriteColor: string;
   ghostType: string;
@@ -11,12 +12,10 @@ export interface Story {
   id: string;
   inputs: StoryInputs;
   text: string;
-  imageUrl: string;
 }
 
 export type LoadingState = {
   story: boolean;
-  image: boolean;
   audio: boolean;
   isGenerating: boolean;
 };
