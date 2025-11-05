@@ -6,9 +6,6 @@ import Header from './components/Header';
 import StoryForm from './components/StoryForm';
 import StoryDisplay from './components/StoryDisplay';
 import StoryLibrary from './components/StoryLibrary';
-// Fix: Per Gemini API guidelines, the API key should not be managed in the UI.
-// import ApiKeyModal from './components/ApiKeyModal';
-// import { setApiKey } from './services/apiKeyService';
 
 // Audio decoding utilities
 const decode = (base64: string) => {
@@ -54,8 +51,6 @@ export default function App() {
   });
   const [error, setError] = useState<string | null>(null);
   const [showLibrary, setShowLibrary] = useState(false);
-  // Fix: Per Gemini API guidelines, the API key should not be managed in the UI.
-  // const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
@@ -116,13 +111,7 @@ export default function App() {
       };
       setCurrentStory(newStory);
     } catch (err: any) {
-      // Fix: Per Gemini API guidelines, the API key should not be managed in the UI.
-      // The modal for entering an API key has been removed.
-      if (err.message === 'API_KEY_NOT_SET') {
-          setError("This application has not been configured with a Gemini API key. Please check the setup.");
-      } else {
-        setError(err.message || 'An unknown error occurred.');
-      }
+      setError(err.message || 'An unknown error occurred.');
     } finally {
       setLoading({story: false, audio: false, isGenerating: false});
     }
@@ -158,13 +147,7 @@ export default function App() {
       };
 
     } catch (err: any) {
-      // Fix: Per Gemini API guidelines, the API key should not be managed in the UI.
-      // The modal for entering an API key has been removed.
-      if (err.message === 'API_KEY_NOT_SET') {
-          setError("This application has not been configured with a Gemini API key. Please check the setup.");
-      } else {
-        setError(err.message);
-      }
+      setError(err.message);
     } finally {
       setLoading(prev => ({ ...prev, audio: false }));
     }
@@ -189,13 +172,6 @@ export default function App() {
     setStoryLibrary(updatedLibrary);
     localStorage.setItem('petGhostStoryLibrary', JSON.stringify(updatedLibrary));
   };
-
-  // Fix: Per Gemini API guidelines, the API key should not be managed in the UI.
-  // const handleSaveApiKey = (key: string) => {
-  //   setApiKey(key);
-  //   setShowApiKeyModal(false);
-  //   setError(null);
-  // };
 
   return (
     <div className="min-h-screen bg-[#FFFDF9] text-gray-800 font-sans p-4 sm:p-6 lg:p-8">
@@ -229,8 +205,6 @@ export default function App() {
           onDeleteStory={deleteStoryFromLibrary}
         />
       )}
-      {/* Fix: Per Gemini API guidelines, the API key should not be managed in the UI. */}
-      {/* {showApiKeyModal && <ApiKeyModal onSave={handleSaveApiKey} onClose={() => setShowApiKeyModal(false)} />} */}
     </div>
   );
 }
