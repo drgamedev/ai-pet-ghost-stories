@@ -1,0 +1,7 @@
+{
+  "name": "Pet-Ghost Story Generator",
+  "description": "A fun, family-friendly AI app that creates short, personalized bedtime stories starring a child’s pet — with a cute, spooky twist. Enter your pet's details and get a unique story with an illustration and read-aloud narration.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
