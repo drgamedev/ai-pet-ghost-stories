@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Story, StoryInputs, LoadingState } from './types';
 import { GHOST_TYPES, MOODS, PLACES, COLORS } from './constants';
@@ -7,6 +6,8 @@ import Header from './components/Header';
 import StoryForm from './components/StoryForm';
 import StoryDisplay from './components/StoryDisplay';
 import StoryLibrary from './components/StoryLibrary';
+import ApiKeyModal from './components/ApiKeyModal';
+import { setApiKey } from './services/apiKeyService';
 
 // Audio decoding utilities
 const decode = (base64: string) => {
@@ -52,6 +53,7 @@ export default function App() {
   });
   const [error, setError] = useState<string | null>(null);
   const [showLibrary, setShowLibrary] = useState(false);
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
@@ -114,9 +116,14 @@ export default function App() {
       };
       setCurrentStory(newStory);
     } catch (err: any) {
-      setError(err.message || 'An unknown error occurred.');
+      if (err.message === 'API_KEY_NOT_SET') {
+          setError("Please set your Gemini API key to continue.");
+          setShowApiKeyModal(true);
+      } else {
+        setError(err.message || 'An unknown error occurred.');
+      }
     } finally {
-      setLoading(prev => ({...prev, isGenerating: false}));
+      setLoading(prev => ({...prev, isGenerating: false, story: false, image: false}));
     }
   };
   
@@ -150,7 +157,12 @@ export default function App() {
       };
 
     } catch (err: any) {
-      setError(err.message);
+      if (err.message === 'API_KEY_NOT_SET') {
+          setError("Please set your Gemini API key to continue.");
+          setShowApiKeyModal(true);
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(prev => ({ ...prev, audio: false }));
     }
@@ -176,6 +188,11 @@ export default function App() {
     localStorage.setItem('petGhostStoryLibrary', JSON.stringify(updatedLibrary));
   };
 
+  const handleSaveApiKey = (key: string) => {
+    setApiKey(key);
+    setShowApiKeyModal(false);
+    setError(null);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#1a1a2e] to-[#16213e] text-white font-sans p-4 sm:p-6 lg:p-8">
@@ -208,6 +225,7 @@ export default function App() {
           onDeleteStory={deleteStoryFromLibrary}
         />
       )}
+      {showApiKeyModal && <ApiKeyModal onSave={handleSaveApiKey} />}
     </div>
   );
 }

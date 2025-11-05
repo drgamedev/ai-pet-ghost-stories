@@ -1,11 +1,11 @@
-
 import { GoogleGenAI, Modality } from "@google/genai";
 import { StoryInputs } from '../types';
+import { getApiKey } from './apiKeyService';
 
 const getAiClient = () => {
-    const apiKey = process.env.API_KEY;
+    const apiKey = getApiKey();
     if (!apiKey) {
-        throw new Error("API_KEY environment variable not set");
+        throw new Error("API_KEY_NOT_SET");
     }
     return new GoogleGenAI({ apiKey });
 };
